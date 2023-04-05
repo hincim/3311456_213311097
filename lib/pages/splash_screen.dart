@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:kelimeezberle/pages/main_page.dart';
 
-class TemporaryPage extends StatefulWidget {
-  const TemporaryPage({Key? key}) : super(key: key);
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  State<TemporaryPage> createState() => _TemporaryPageState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _TemporaryPageState extends State<TemporaryPage> {
+class _SplashScreenState extends State<SplashScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(seconds: 2),(){
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>
+      const MainPage()
+      ));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +34,7 @@ class _TemporaryPageState extends State<TemporaryPage> {
               children: [
                 Column(
                   children: [
-                    Image.asset("assets/images/orneklogo.png"),
+                    Image.asset("assets/images/logo.png"),
                     const Padding(
                       padding: EdgeInsets.all(15.0),
                       child: Text("Kelime Ezberle",style: TextStyle(color: Colors.black,
@@ -31,6 +45,11 @@ class _TemporaryPageState extends State<TemporaryPage> {
                 const Padding(
                   padding: EdgeInsets.all(15.0),
                   child: Text("İstediğini Öğren",style: TextStyle(color: Colors.black,
+                      fontFamily: "Carter",fontSize: 25),),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: Text("Pratik Yap",style: TextStyle(color: Colors.black,
                       fontFamily: "Carter",fontSize: 25),),
                 )
               ],

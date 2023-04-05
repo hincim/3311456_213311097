@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kelimeezberle/pages/temporary.dart';
+import 'package:kelimeezberle/pages/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const TemporaryPage(),
+      home: const SplashScreen(),
     );
   }
 }

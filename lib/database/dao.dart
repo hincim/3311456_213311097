@@ -130,6 +130,13 @@ class DB{
 
   }
 
+  Future<int> markAsLearned(bool mark, int id) async{
+    final db = await instance.database;
+    int result = mark==true?1:0;
+    // mark true ise result 1 olsun değilse 0 olsun.
+    return db.update(tableNameWords, {WordTableFields.status:result},where: '${WordTableFields.id} = ?',whereArgs: [id]);
+  }
+
   Future<int> deleteListsAndWordByList(int id) async{
 
     final db = await instance.database;

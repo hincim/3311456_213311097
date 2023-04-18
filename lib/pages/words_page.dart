@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kelimeezberle/database/dao.dart';
 
 import '../global_widget/app_bar.dart';
+import '../global_widget/toast.dart';
 import '../models/words.dart';
 import '../practical_method.dart';
 
@@ -23,6 +24,9 @@ class _WordsPageState extends State<WordsPage> {
 
   List<Word> _wordList = [];
 
+  bool pressController = false;
+  List<bool> deleteIndexList = [];
+
   @override
   void initState() {
     // TODO: implement initState
@@ -35,9 +39,37 @@ class _WordsPageState extends State<WordsPage> {
 
 
     _wordList = await DB.instance.getWordByList(listID);
+
+    for(int i = 0; i<_wordList.length; i++){
+      deleteIndexList.add(false);
+    }
     setState(() => _wordList);
     // sayfaya kelimelerin geldiğini bildiririm.
 
+  }
+
+  void delete() async{
+
+    List<int> removeIndexList = [];
+    for(int i = 0; i<deleteIndexList.length; ++i){
+      if(deleteIndexList[i]){
+        removeIndexList.add(i);
+      }
+    }
+
+    for(int i = removeIndexList.length -1; i>=0; --i){
+      DB.instance.deleteWord(_wordList[removeIndexList[i]].id!);
+      _wordList.removeAt(removeIndexList[i]);
+      deleteIndexList.removeAt(removeIndexList[i]);
+    }
+
+    setState(() {
+      _wordList;
+      deleteIndexList;
+      pressController = false;
+    });
+
+    showToast("Seçili kelimeler silindi.");
   }
 
   @override
@@ -50,10 +82,13 @@ class _WordsPageState extends State<WordsPage> {
         size: 22,
       ), center: Text(listName!, style: TextStyle(fontFamily: "carter",fontSize: 22,
       color: Colors.black),),
-          right:Padding(
+          right: pressController!=true ? Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: Image.asset("assets/images/logo.png",
               height: 80,width: 80,)
+          ): GestureDetector(
+            onTap: delete,
+            child: Icon(Icons.delete, color: Colors.teal,size: 28,),
           ) ,
           leftWidgetOnClick: ()=>{
             Navigator.pop(context)
@@ -70,51 +105,93 @@ class _WordsPageState extends State<WordsPage> {
     );
   }
 
-  Center wordItem(int wordId, int index, {@required String ?word_tr,
+  GestureDetector wordItem(int wordId, int index, {@required String ?word_tr,
   @required String ?word_eng, @required bool ?status}) {
-    return Center(
-            child: Container(
-              width: double.infinity,
-              child: Card(
-                color: Color(PracticalMethod.HexaColorConvertColor("#2da2a6")),
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)
-                ),
-                margin: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(left: 15,top: 10),
-                          child: Text(word_tr!,style: TextStyle(color: Colors.black,
-                              fontSize: 18,fontFamily: "RobotoMedium"),),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(left: 30,bottom: 10),
-                          child: Text(word_eng!,style: TextStyle(color: Colors.black,
-                              fontSize: 16,fontFamily: "RobotoRegular"),),
-                        ),
-                      ],
-                    ),
-                    Checkbox(
-                      checkColor: Colors.white,
-                      activeColor: Colors.black,
-                      hoverColor: Colors.blueAccent,
-                      value: status,
-                      onChanged: (bool? value){
+    return GestureDetector(
+      onLongPress: (){
+        setState(() {
+          pressController = true;
+          deleteIndexList[index] = true;
+        });
+      },
+      child: Center(
+              child: Container(
+                width: double.infinity,
+                child: Card(
+                  color: pressController!=true? Color(PracticalMethod.HexaColorConvertColor("#2da2a6")):
+                  Color(PracticalMethod.HexaColorConvertColor("#92d5d7")),
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)
+                  ),
+                  margin: const EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(left: 15,top: 10),
+                            child: Text(word_tr!,style: TextStyle(color: Colors.black,
+                                fontSize: 18,fontFamily: "RobotoMedium"),),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 30,bottom: 10),
+                            child: Text(word_eng!,style: TextStyle(color: Colors.black,
+                                fontSize: 16,fontFamily: "RobotoRegular"),),
+                          ),
+                        ],
+                      ),
+                      pressController!=true? Checkbox(
+                        checkColor: Colors.white,
+                        activeColor: Colors.black,
+                        hoverColor: Colors.blueAccent,
+                        value: status,
+                        onChanged: (bool? value){
 
-                      },
-                    )
-                  ],
+                          _wordList[index] = _wordList[index].copy(status: value);
+                          if(value == true){
+                            showToast("Öğrenildi olarak işaretlendi.");
+                            DB.instance.markAsLearned(true, _wordList[index].id as int);
+                          }else{
+                            showToast("Öğrenilmedi olarak işaretlendi.");
+                            DB.instance.markAsLearned(false, _wordList[index].id as int);
+                          }
+                          setState(() {
+                            _wordList;
+                            // listeyi güncellerim.
+                          });
+                        },
+                      ):Checkbox(checkColor: Colors.white,
+                        activeColor: Colors.black,
+                        hoverColor: Colors.blueAccent,
+                        value: deleteIndexList[index],
+                      onChanged: (bool ?value){
+
+                        setState(() {
+                          deleteIndexList[index] = value!;
+                          bool deleteProcessController = false;
+
+                          deleteIndexList.forEach((element) {
+                            if(element == true){
+                              deleteProcessController = true;
+                            }
+                          });
+                          
+                          if(!deleteProcessController){
+                            pressController = false;
+                          }
+
+                        });
+                      },) // silme checkboxı
+                    ],
+                  ),
                 ),
               ),
             ),
-          );
+    );
   }
 }

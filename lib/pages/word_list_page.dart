@@ -57,11 +57,6 @@ class _WordListPageState extends State<WordListPage> {
       deleteIndexList.removeAt(removeIndexList[i]);
     }
 
-    for(int i = 0; i<deleteIndexList.length; ++i){
-      deleteIndexList[i] = false;
-      // silinecek liste içeirindeki bütün değerleri false yaptım.
-    }
-
     setState(() {
       _lists;
       deleteIndexList;
@@ -119,7 +114,9 @@ class _WordListPageState extends State<WordListPage> {
     return GestureDetector(
       onTap: (){
         debugPrint(id.toString());
-        Navigator.push(context, MaterialPageRoute(builder: (context) => WordsPage(id, listname)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => WordsPage(id, listname))).then((value) {
+          getLists();
+        });
       },
       onLongPress: (){
         setState(() {

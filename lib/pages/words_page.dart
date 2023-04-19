@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kelimeezberle/database/dao.dart';
+import 'package:kelimeezberle/pages/add_word_page.dart';
 
 import '../global_widget/app_bar.dart';
 import '../global_widget/toast.dart';
@@ -102,6 +103,14 @@ class _WordsPageState extends State<WordsPage> {
         },
         itemCount: _wordList.length,),
       ),
+      floatingActionButton: FloatingActionButton(onPressed: (){
+
+        Navigator.push(context, MaterialPageRoute(builder: (context) => AddWordPage(listID, listName))).then((value){
+          getWordByList();
+        });
+
+      },
+        backgroundColor: Colors.teal.withOpacity(0.8),child: const Icon(Icons.add),),
     );
   }
 
@@ -180,7 +189,7 @@ class _WordsPageState extends State<WordsPage> {
                               deleteProcessController = true;
                             }
                           });
-                          
+
                           if(!deleteProcessController){
                             pressController = false;
                           }

@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:kelimeezberle/database/dao.dart';
-import 'package:kelimeezberle/global_widget/app_bar.dart';
-import 'package:kelimeezberle/practical_method.dart';
 
+import '../database/dao.dart';
+import '../global_widget/app_bar.dart';
 import '../global_widget/text_field_builder.dart';
 import '../global_widget/toast.dart';
-import '../models/lists.dart';
 import '../models/words.dart';
+import '../practical_method.dart';
 
-class CreateListPage extends StatefulWidget {
-  const CreateListPage({Key? key}) : super(key: key);
+class AddWordPage extends StatefulWidget {
+
+  final int ?listID;
+  final String ?listName;
+
+  const AddWordPage(this.listID, this.listName, {Key? key}) : super(key: key);
 
   @override
-  State<CreateListPage> createState() => _CreateListPageState();
+  State<AddWordPage> createState() => _AddWordPageState(listID: listID, listName: listName);
 }
 
-class _CreateListPageState extends State<CreateListPage> {
-  final _listName = TextEditingController();
+class _AddWordPageState extends State<AddWordPage> {
+
+  int ?listID;
+  String ?listName;
+
+  _AddWordPageState({@required this.listID, @required this.listName});
 
   List<TextEditingController> wordTextEditingList = [];
   List<Row> wordListField = [];
@@ -25,11 +32,11 @@ class _CreateListPageState extends State<CreateListPage> {
   void initState() {
     super.initState();
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 6; i++) {
       wordTextEditingList.add(TextEditingController());
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
       debugPrint(
           "====>>>>" + (2 * i).toString() + "     " + (2 * i + 1).toString());
       wordListField.add(Row(
@@ -45,6 +52,7 @@ class _CreateListPageState extends State<CreateListPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,42 +60,32 @@ class _CreateListPageState extends State<CreateListPage> {
         Icons.arrow_back_ios,
         color: Colors.black,
         size: 22,
-      ), center: Padding(
-        padding: const EdgeInsets.only(top: 12.0),
-        child: Image.asset("assets/images/wordhive.png"),
-      ),
-      right: Padding(
-        padding: const EdgeInsets.only(top: 4.0),
-        child: Image.asset(
-          "assets/images/logo.png",
-          height: 80,
-          width: 80,
-        ),
-      ),leftWidgetOnClick: ()=>{
-        Navigator.pop(context)
+      ), center: Text(listName!, style: TextStyle(fontFamily: "carter",fontSize: 22,
+          color: Colors.black),),
+          right: const Padding(
+              padding: EdgeInsets.only(top: 4.0),
+              child: Icon(
+                Icons.add,
+                color: Colors.black,
+                size: 22,
+              )          ),
+          leftWidgetOnClick: ()=>{
+            Navigator.pop(context)
           }),
       body: SafeArea(
         child: Container(
           color: Colors.white,
           child: Column(
             children: [
-              textFieldBuilder(
-                  icon: Icon(
-                    Icons.list,
-                    size: 18,
-                  ),
-                  hintText: "Liste Adı",
-                  textEditingController: _listName,
-                  textAlign: TextAlign.left),
               Container(
-                margin: EdgeInsets.only(top: 20, bottom: 10),
+                margin: EdgeInsets.only(top: 10, bottom: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Text(
                       "İngilizce",
                       style:
-                          TextStyle(fontSize: 18, fontFamily: "RobotoRegular"),
+                      TextStyle(fontSize: 18, fontFamily: "RobotoRegular"),
                     ),
                     Text("Türkçe",
                         style: TextStyle(
@@ -116,46 +114,25 @@ class _CreateListPageState extends State<CreateListPage> {
       ),
     );
   }
-
-  InkWell actionBtn(Function() click, IconData icon) {
-    return InkWell(
-      onTap: () => click(),
-      child: Container(
-        width: 40,
-        height: 40,
-        margin: EdgeInsets.only(bottom: 10,top: 7),
-        child: Icon(
-          icon,
-          size: 28,
-        ),
-        decoration: BoxDecoration(
-            color: Color(PracticalMethod.HexaColorConvertColor("#2da2a6")),
-            shape: BoxShape.circle),
-      ),
-    );
-  }
-
   void addRow() {
     wordTextEditingList.add(TextEditingController());
     wordTextEditingList.add(TextEditingController());
 
     wordListField.add(
-      Row(
-        children: [
-          Expanded(
-              child: textFieldBuilder(
-                  textEditingController: wordTextEditingList[wordTextEditingList.length -2])),
-          Expanded(
-              child: textFieldBuilder(
-                  textEditingController: wordTextEditingList[wordTextEditingList.length -1])),
-        ],
-      )
+        Row(
+          children: [
+            Expanded(
+                child: textFieldBuilder(
+                    textEditingController: wordTextEditingList[wordTextEditingList.length -2])),
+            Expanded(
+                child: textFieldBuilder(
+                    textEditingController: wordTextEditingList[wordTextEditingList.length -1])),
+          ],
+        )
     );
     setState(()=>wordListField);
   }
   void save() async {
-
-    if(!_listName.text.isEmpty){
 
       int counter = 0;
       bool notEmptyPair = false;
@@ -174,24 +151,21 @@ class _CreateListPageState extends State<CreateListPage> {
         }
       }
 
-      if(counter >= 4){
+      if(counter >= 1){
 
         if(!notEmptyPair){
-
-          Lists addedList = await DB.instance.insertList(Lists(name: _listName.text));
 
           for(int i = 0; i<wordTextEditingList.length/2; ++i){
 
             String eng = wordTextEditingList[2*i].text;
             String tr = wordTextEditingList[2*i+1].text;
 
-            Word word = await DB.instance.insertWord(Word(list_id: addedList.id,
+            Word word = await DB.instance.insertWord(Word(list_id: listID,
                 word_eng: eng, word_tr: tr, status: false));
             debugPrint(word.id.toString()+" "+word.list_id.toString()+" "+ word.word_tr!!+" "+word.word_eng!!+" "+word.status.toString());
           }
-          showToast("Liste oluşturuldu.");
+          showToast("Kelimeler eklendi.");
           Navigator.pop(context);
-          _listName.clear();
           wordTextEditingList.forEach((element) {
             element.clear();
           });
@@ -201,18 +175,13 @@ class _CreateListPageState extends State<CreateListPage> {
           showToast("Boş alanları doldurun veya silin.");
         }
       }else{
-        showToast("Minimum 4 çift dolu olmalıdır.");
+        showToast("Minimum 1 çift dolu olmalıdır.");
 
       }
-    }else{
-      showToast("Liste adı olmalı.");
-
     }
 
-
-  }
   void deleteRow() {
-    if(wordListField.length != 4){
+    if(wordListField.length != 1){
 
       wordTextEditingList.removeAt(wordTextEditingList.length-1);
       wordTextEditingList.removeAt(wordTextEditingList.length-1);
@@ -222,7 +191,25 @@ class _CreateListPageState extends State<CreateListPage> {
       setState(()=>wordListField);
 
     }else{
-      showToast("Minimum 4 çift gereklidir.");
+      showToast("Minimum 1 çift gereklidir.");
     }
+  }
+
+  InkWell actionBtn(Function() click, IconData icon) {
+    return InkWell(
+      onTap: () => click(),
+      child: Container(
+        width: 40,
+        height: 40,
+        margin: EdgeInsets.only(bottom: 10,top: 7),
+        child: Icon(
+          icon,
+          size: 28,
+        ),
+        decoration: BoxDecoration(
+            color: Color(PracticalMethod.HexaColorConvertColor("#2da2a6")),
+            shape: BoxShape.circle),
+      ),
+    );
   }
 }

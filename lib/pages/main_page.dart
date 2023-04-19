@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:kelimeezberle/global_widget/app_bar.dart';
+import 'package:kelimeezberle/global_widget/toast.dart';
 import 'package:kelimeezberle/pages/word_list_page.dart';
 import 'package:kelimeezberle/practical_method.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../utils/location.dart';
+import '../utils/weather.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -39,11 +43,60 @@ class _MainPageState extends State<MainPage> {
 
   PackageInfo? packageInfo;
   String version = "";
+  late WeatherData weatherData;
+  bool spinKitController = true;
 
   @override
   void initState() {
     super.initState();
     packageInfoInit();
+    getWeatherData();
+  }
+
+
+  late String temperature;
+  late Icon weatherDisplayIcon;
+  late AssetImage backGroundImage;
+  late String city;
+
+  void updateDisplayInfo(WeatherData weatherData){
+    setState(() {
+      temperature = weatherData.currentTemperature.round().toString().substring(0,2);
+      WeatherDisplayData weatherDisplayData = weatherData.getWeatherDisplayData();
+      backGroundImage = weatherDisplayData.weatherImage;
+      weatherDisplayIcon = weatherDisplayData.weatherIcon;
+      city = weatherData.city;
+    });
+  }
+
+  late LocationHelper locationData;
+  Future<void> getLocationData() async{
+
+    locationData = LocationHelper();
+    await locationData.getCurrentLocation();
+
+    if(locationData == null || locationData.longitude == null){
+      showToast("Konum bilgisi alınamadı.");
+    }else{
+      print("latitude: "+locationData.latitude.toString());
+      print("longitude: "+locationData.longitude.toString());
+    }
+  }
+
+  void getWeatherData() async{
+    await getLocationData();
+    // İLK OLARAK KONUMU AL
+    weatherData = WeatherData(locationData: locationData);
+    await weatherData.getCurrentTemperature();
+
+    if(weatherData.currentTemperature == null || weatherData.currentCondition == null){
+      showToast("Hava durumu bilgisi alınamadı.");
+    }
+
+    updateDisplayInfo(weatherData);
+    setState(() {
+      spinKitController = false;
+    });
   }
 
   void packageInfoInit() async {
@@ -196,7 +249,55 @@ class _MainPageState extends State<MainPage> {
                         title: "Çoktan\nSeçmeli")
                   ],
                 ),
-              )
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(
+                  child: Container(
+                    height: 200,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                       /* gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Colors.black45,Colors.teal]
+                        ) */
+                      color: Colors.white
+                    ),
+                    child: Center(
+                      child: spinKitController ?SpinKitFadingCircle(
+                        color: Colors.black,
+                        size: 75.0,
+                        duration: Duration(milliseconds: 1200),
+                      ): Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          image: DecorationImage(
+                            fit: BoxFit.fitWidth,
+                            image: backGroundImage
+                          ),
+                        ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                    child: weatherDisplayIcon
+                                ),
+                              ),
+                              Text("$temperature°"),
+                              Text(city),
+                            ],
+                          )
+                      ),
+                      )
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

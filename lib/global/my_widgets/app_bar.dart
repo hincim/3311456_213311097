@@ -2,10 +2,9 @@
 
 import 'package:flutter/material.dart';
 
-PreferredSize appBar(context,{@required Widget ?left,@required Widget ?center,
+PreferredSize appBar(context,{@required Widget ?left,Widget ?center,
 Widget ?right,Function ?leftWidgetOnClick}){
-  // required eklemezsem zorunlu olmaz.
-  
+
   
   return PreferredSize(preferredSize: const Size.fromHeight(50), child: AppBar(
     automaticallyImplyLeading: false,

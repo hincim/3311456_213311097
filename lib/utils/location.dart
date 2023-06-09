@@ -1,5 +1,6 @@
 
 import 'package:geolocator/geolocator.dart';
+import 'package:kelimeezberle/global/my_widgets/toast.dart';
 
 class LocationHelper {
   late double latitude;
@@ -7,13 +8,25 @@ class LocationHelper {
 
   Future<void> getCurrentLocation() async {
 
-    await Geolocator.requestPermission();
-    // izin almak için bu kodlama gerek.
+    try{
+      LocationPermission check = await Geolocator.requestPermission();
+      if(check == LocationPermission.denied){
+        showToast("Konum izini reddedildi");
+      }
+      else if (check == LocationPermission.deniedForever) {
+        showToast(
+            'Konum izni kalıcı olarak reddedildi.');
+
+      }
+    }catch(e){
+      showToast("Konum alınamadı");
+    }
 
     var location = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     // hassasiyeti high olsun.
-
     latitude = location.latitude;
     longitude = location.longitude;
+
   }
+
 }

@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 import 'package:kelimeezberle/constants/api_key.dart';
-import 'package:kelimeezberle/global_widget/toast.dart';
-
+import '../global/my_widgets/toast.dart';
 import 'location.dart';
 
 
@@ -18,7 +17,7 @@ class WeatherDisplayData{
   WeatherDisplayData({required this.weatherIcon, required this.weatherImage});
 }
 
-class WeatherData{
+class WeatherData extends ChangeNotifier{
 
   LocationHelper locationData;
 
@@ -29,8 +28,7 @@ class WeatherData{
   late String city;
 
   Future<void> getCurrentTemperature() async{
-
-    var url = Uri.parse("https://api.openweathermap.org/data/2.5/weather?lat=${locationData.latitude}&lon=${locationData.longitude}&appid=$apiKey&unit=metric");
+    var url = Uri.parse("https://api.openweathermap.org/data/2.5/weather?lat=${locationData.latitude}&lon=${locationData.longitude}&appid=$apiKey&units=metric");
     Response response = await get(url);
 
     if(response.statusCode == 200){
@@ -49,10 +47,11 @@ class WeatherData{
         // bulutlu mu olduğunu alırım.
         city = currentWeather["name"];
       }catch(e){
-        print(e);
+
+        showToast("Hava durumu bilgisi alınamadı");
       }
     }else{
-      showToast("Hava durumu bilgisi alınamadı.");
+      showToast("Hava durumu bilgisi alınamadı");
     }
   }
 
@@ -61,9 +60,10 @@ class WeatherData{
       // bana havanın bulutlu olduğunu söylüyor.
       return WeatherDisplayData(weatherIcon: Icon(FontAwesomeIcons.cloud,size: 75.0,color: Colors.white)
           ,weatherImage: AssetImage("assets/images/cloudy.png"));
+
     }else{
-      var now = new DateTime.now();
-      if(now.hour >= 19){
+      var now = DateTime.now();
+      if(now.hour >= 19 || now.hour <= 5){
         // saat akşamsa
         return WeatherDisplayData(weatherIcon: Icon(FontAwesomeIcons.moon,size: 75.0,color: Colors.white)
             ,weatherImage: AssetImage("assets/images/night.png"));

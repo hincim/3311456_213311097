@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
+import '../../database/dao.dart';
+import '../../global/my_widgets/app_bar.dart';
+import '../../global/my_widgets/text_field_builder.dart';
+import '../../global/my_widgets/toast.dart';
+import '../../models/words.dart';
+import '../../utils/practical_method.dart';
 
-import '../database/dao.dart';
-import '../global_widget/app_bar.dart';
-import '../global_widget/text_field_builder.dart';
-import '../global_widget/toast.dart';
-import '../models/words.dart';
-import '../practical_method.dart';
 
 class AddWordPage extends StatefulWidget {
 
-  final int ?listID;
-  final String ?listName;
+  final int ?_listID;
+  final String ?_listName;
 
-  const AddWordPage(this.listID, this.listName, {Key? key}) : super(key: key);
+  const AddWordPage(this._listID, this._listName, {Key? key}) : super(key: key);
 
   @override
-  State<AddWordPage> createState() => _AddWordPageState(listID: listID, listName: listName);
+  State<AddWordPage> createState() => _AddWordPageState(listID: _listID, listName: _listName);
 }
 
 class _AddWordPageState extends State<AddWordPage> {
 
-  int ?listID;
-  String ?listName;
+  int ?_listID;
+  String ?_listName;
 
-  _AddWordPageState({@required this.listID, @required this.listName});
+  _AddWordPageState({@required int? listID, @required String? listName}) : _listName = listName, _listID = listID;
 
   List<TextEditingController> wordTextEditingList = [];
   List<Row> wordListField = [];
@@ -60,7 +60,7 @@ class _AddWordPageState extends State<AddWordPage> {
         Icons.arrow_back_ios,
         color: Colors.black,
         size: 22,
-      ), center: Text(listName!, style: TextStyle(fontFamily: "carter",fontSize: 22,
+      ), center: Text(_listName!, style: TextStyle(fontFamily: "carter",fontSize: 22,
           color: Colors.black),),
           right: const Padding(
               padding: EdgeInsets.only(top: 4.0),
@@ -160,11 +160,11 @@ class _AddWordPageState extends State<AddWordPage> {
             String eng = wordTextEditingList[2*i].text;
             String tr = wordTextEditingList[2*i+1].text;
 
-            Word word = await DB.instance.insertWord(Word(list_id: listID,
+            Word word = await DB.instance.insertWord(Word(list_id: _listID,
                 word_eng: eng, word_tr: tr, status: false));
             debugPrint(word.id.toString()+" "+word.list_id.toString()+" "+ word.word_tr!!+" "+word.word_eng!!+" "+word.status.toString());
           }
-          showToast("Kelimeler eklendi.");
+          showToast("Kelimeler eklendi");
           Navigator.pop(context);
           wordTextEditingList.forEach((element) {
             element.clear();
@@ -172,10 +172,10 @@ class _AddWordPageState extends State<AddWordPage> {
 
         }else{
 
-          showToast("Boş alanları doldurun veya silin.");
+          showToast("Boş alanları doldurun veya silin");
         }
       }else{
-        showToast("Minimum 1 çift dolu olmalıdır.");
+        showToast("Minimum 1 çift dolu olmalıdır");
 
       }
     }
@@ -191,7 +191,7 @@ class _AddWordPageState extends State<AddWordPage> {
       setState(()=>wordListField);
 
     }else{
-      showToast("Minimum 1 çift gereklidir.");
+      showToast("Minimum 1 çift gereklidir");
     }
   }
 

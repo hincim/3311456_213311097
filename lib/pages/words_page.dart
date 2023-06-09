@@ -1,50 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:kelimeezberle/database/dao.dart';
-import 'package:kelimeezberle/pages/add_word_page.dart';
-
-import '../global_widget/app_bar.dart';
-import '../global_widget/toast.dart';
+import 'package:kelimeezberle/global/functions/global_functions.dart';
+import '../global/my_widgets/app_bar.dart';
+import '../global/my_widgets/toast.dart';
 import '../models/words.dart';
-import '../practical_method.dart';
+import '../utils/practical_method.dart';
+import 'local_database_page/add_word_page.dart';
+import 'local_database_page/update_word_db.dart';
 
 class WordsPage extends StatefulWidget {
-  final int ?listID;
-  final String ?listName;
+  final int ?_listID;
+  final String ?_listName;
 
-  const WordsPage(this.listID, this.listName,{Key? key}) : super(key: key);
+  const WordsPage(this._listID, this._listName,{Key? key}) : super(key: key);
 
   @override
-  State<WordsPage> createState() => _WordsPageState(listID: listID,listName: listName);
+  State<WordsPage> createState() => _WordsPageState(listID: _listID,listName: _listName);
 }
 
 class _WordsPageState extends State<WordsPage> {
-  int ?listID;
-  String ?listName;
+  int ?_listID;
+  String ?_listName;
 
-  _WordsPageState({@required this.listID, @required this.listName});
+  _WordsPageState({@required int? listID, @required String? listName}) : _listName = listName, _listID = listID;
 
-  List<Word> _wordList = [];
+  List<Word> wordList = [];
 
-  bool pressController = false;
+  bool _pressController = false;
   List<bool> deleteIndexList = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    debugPrint("$listID - $listName");
+    debugPrint("$_listID - $_listName");
     getWordByList();
   }
 
   void getWordByList() async{
 
 
-    _wordList = await DB.instance.getWordByList(listID);
+    wordList = await DB.instance.getWordByList(_listID);
 
-    for(int i = 0; i<_wordList.length; i++){
+    for(int i = 0; i<wordList.length; i++){
       deleteIndexList.add(false);
     }
-    setState(() => _wordList);
+    setState(() => wordList);
     // sayfaya kelimelerin geldiğini bildiririm.
 
   }
@@ -59,15 +60,15 @@ class _WordsPageState extends State<WordsPage> {
     }
 
     for(int i = removeIndexList.length -1; i>=0; --i){
-      DB.instance.deleteWord(_wordList[removeIndexList[i]].id!);
-      _wordList.removeAt(removeIndexList[i]);
+      DB.instance.deleteWord(wordList[removeIndexList[i]].id!);
+      wordList.removeAt(removeIndexList[i]);
       deleteIndexList.removeAt(removeIndexList[i]);
     }
 
     setState(() {
-      _wordList;
+      wordList;
       deleteIndexList;
-      pressController = false;
+      _pressController = false;
     });
 
     showToast("Seçili kelimeler silindi.");
@@ -81,9 +82,9 @@ class _WordsPageState extends State<WordsPage> {
         Icons.arrow_back_ios,
         color: Colors.black,
         size: 22,
-      ), center: Text(listName!, style: TextStyle(fontFamily: "carter",fontSize: 22,
+      ), center: Text(_listName!, style: TextStyle(fontFamily: "carter",fontSize: 22,
       color: Colors.black),),
-          right: pressController!=true ? Padding(
+          right: _pressController!=true ? Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: Image.asset("assets/images/logo.png",
               height: 80,width: 80,)
@@ -98,14 +99,14 @@ class _WordsPageState extends State<WordsPage> {
       body: SafeArea(
         child: ListView.builder(itemBuilder: (context, index) {
           
-          return wordItem(_wordList[index].id!,
-              index, word_tr: _wordList[index].word_tr, word_eng: _wordList[index].word_eng, status: _wordList[index].status);
+          return wordItem(wordList[index].id!,
+              index, word_tr: wordList[index].word_tr, word_eng: wordList[index].word_eng, status: wordList[index].status);
         },
-        itemCount: _wordList.length,),
+        itemCount: wordList.length,),
       ),
       floatingActionButton: FloatingActionButton(onPressed: (){
 
-        Navigator.push(context, MaterialPageRoute(builder: (context) => AddWordPage(listID, listName))).then((value){
+        Navigator.push(context, MaterialPageRoute(builder: (context) => AddWordPage(_listID, _listName))).then((value){
           getWordByList();
         });
 
@@ -119,15 +120,21 @@ class _WordsPageState extends State<WordsPage> {
     return GestureDetector(
       onLongPress: (){
         setState(() {
-          pressController = true;
+          _pressController = true;
           deleteIndexList[index] = true;
+        });
+      },
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateWordDB(listName: _listName, listId: _listID, wordId: wordId,word_tr: word_tr,word_eng: word_eng,))).then((value){
+          getWordByList();
+          getLists();
         });
       },
       child: Center(
               child: Container(
                 width: double.infinity,
                 child: Card(
-                  color: pressController!=true? Color(PracticalMethod.HexaColorConvertColor("#2da2a6")):
+                  color: _pressController!=true? Color(PracticalMethod.HexaColorConvertColor("#2da2a6")):
                   Color(PracticalMethod.HexaColorConvertColor("#92d5d7")),
                   elevation: 8,
                   shape: RoundedRectangleBorder(
@@ -154,23 +161,23 @@ class _WordsPageState extends State<WordsPage> {
                           ),
                         ],
                       ),
-                      pressController!=true? Checkbox(
+                      _pressController!=true? Checkbox(
                         checkColor: Colors.white,
                         activeColor: Colors.black,
                         hoverColor: Colors.blueAccent,
                         value: status,
                         onChanged: (bool? value){
 
-                          _wordList[index] = _wordList[index].copy(status: value);
+                          wordList[index] = wordList[index].copy(status: value);
                           if(value == true){
-                            showToast("Öğrenildi olarak işaretlendi.");
-                            DB.instance.markAsLearned(true, _wordList[index].id as int);
+                            showToast("Öğrenildi olarak işaretlendi");
+                            DB.instance.markAsLearned(true, wordList[index].id as int);
                           }else{
-                            showToast("Öğrenilmedi olarak işaretlendi.");
-                            DB.instance.markAsLearned(false, _wordList[index].id as int);
+                            showToast("Öğrenilmedi olarak işaretlendi");
+                            DB.instance.markAsLearned(false, wordList[index].id as int);
                           }
                           setState(() {
-                            _wordList;
+                            wordList;
                             // listeyi güncellerim.
                           });
                         },
@@ -191,7 +198,7 @@ class _WordsPageState extends State<WordsPage> {
                           });
 
                           if(!deleteProcessController){
-                            pressController = false;
+                            _pressController = false;
                           }
 
                         });

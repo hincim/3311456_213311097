@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:kelimeezberle/database/dao.dart';
-import 'package:kelimeezberle/global_widget/app_bar.dart';
-import 'package:kelimeezberle/global_widget/toast.dart';
-import 'package:kelimeezberle/pages/create_list_page.dart';
 import 'package:kelimeezberle/pages/words_page.dart';
-import 'package:kelimeezberle/practical_method.dart';
+import 'package:kelimeezberle/utils/practical_method.dart';
+import '../global/my_widgets/app_bar.dart';
+import '../global/my_widgets/toast.dart';
+import 'local_database_page/create_list_page.dart';
 
 class WordListPage extends StatefulWidget {
   const WordListPage({Key? key}) : super(key: key);
@@ -63,7 +63,7 @@ class _WordListPageState extends State<WordListPage> {
       pressController = false;
     });
 
-    showToast("Seçili listeler silindi.");
+    showToast("Seçili listeler silindi");
   }
 
   @override

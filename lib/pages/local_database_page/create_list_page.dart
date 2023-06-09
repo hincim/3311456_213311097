@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:kelimeezberle/database/dao.dart';
-import 'package:kelimeezberle/global_widget/app_bar.dart';
-import 'package:kelimeezberle/practical_method.dart';
+import 'package:kelimeezberle/utils/practical_method.dart';
+import '../../global/my_widgets/app_bar.dart';
+import '../../global/my_widgets/text_field_builder.dart';
+import '../../global/my_widgets/toast.dart';
+import '../../models/lists.dart';
+import '../../models/words.dart';
 
-import '../global_widget/text_field_builder.dart';
-import '../global_widget/toast.dart';
-import '../models/lists.dart';
-import '../models/words.dart';
 
 class CreateListPage extends StatefulWidget {
   const CreateListPage({Key? key}) : super(key: key);
@@ -189,7 +189,7 @@ class _CreateListPageState extends State<CreateListPage> {
                 word_eng: eng, word_tr: tr, status: false));
             debugPrint(word.id.toString()+" "+word.list_id.toString()+" "+ word.word_tr!!+" "+word.word_eng!!+" "+word.status.toString());
           }
-          showToast("Liste oluşturuldu.");
+          showToast("Liste oluşturuldu");
           Navigator.pop(context);
           _listName.clear();
           wordTextEditingList.forEach((element) {
@@ -198,14 +198,14 @@ class _CreateListPageState extends State<CreateListPage> {
 
         }else{
 
-          showToast("Boş alanları doldurun veya silin.");
+          showToast("Boş alanları doldurun veya silin");
         }
       }else{
-        showToast("Minimum 4 çift dolu olmalıdır.");
+        showToast("Minimum 4 çift dolu olmalıdır");
 
       }
     }else{
-      showToast("Liste adı olmalı.");
+      showToast("Liste adı olmalı");
 
     }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:kelimeezberle/practical_method.dart';
+import 'package:kelimeezberle/utils/practical_method.dart';
 
 
 void showToast(String message){
@@ -10,8 +10,8 @@ void showToast(String message){
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
-      backgroundColor: Color(PracticalMethod.HexaColorConvertColor("#323ba4")),
-      textColor: Colors.white,
+      backgroundColor: Color(PracticalMethod.HexaColorConvertColor("#abdfe0")),
+      textColor: Color(PracticalMethod.HexaColorConvertColor("#0C33B2")),
       fontSize: 16.0
   );
 }
